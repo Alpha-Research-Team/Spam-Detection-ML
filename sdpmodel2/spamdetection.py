@@ -14,7 +14,7 @@ from sklearn.linear_model import LogisticRegression
 import streamlit as st
 
 # import data
-data = pd.read_csv(r"D:\Research\sdpmodel2\spam.csv", encoding='latin-1')
+data = pd.read_csv("D:\Research\Spam-Detection-ML\sdpmodel2\spam.csv", encoding='latin-1')
 
 
 

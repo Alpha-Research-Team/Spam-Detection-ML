@@ -120,7 +120,7 @@ if st.button('Validate Message 🚀'):
         st.warning('⚠️ Please enter a valid message.')
     else:
         result = sd.predict(rt_message)
-        if result == 'Spam':
+        if result['consensus'] == 'Spam':
             st.markdown(
                 f"<div class='result-box spam'>❌ This message is <b>SPAM</b>.</div>",
                 unsafe_allow_html=True
