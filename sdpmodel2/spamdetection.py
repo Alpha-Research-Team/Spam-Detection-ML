@@ -9,6 +9,17 @@ from sklearn.naive_bayes import MultinomialNB
 # second algorithm
 from sklearn.linear_model import LogisticRegression
 
+# third algorithm
+from sklearn.naive_bayes import GaussianNB
+
+# fourth algorithm
+from sklearn.naive_bayes import BernoulliNB
+
+# for metrics
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import precision_score
+
 
 # for interface
 import streamlit as st
@@ -42,6 +53,12 @@ mnModel.fit(cvTransform, category_train)
 lrModel = LogisticRegression()
 lrModel.fit(cvTransform, category_train)
 
+gnModel = GaussianNB()
+gnModel.fit(cvTransform, category_train)
+
+bnModel = BernoulliNB()
+bnModel.fit(cvTransform, category_train)
+
 # test model
 cvDataTest = cvData.transform(message_test)
 
@@ -49,6 +66,18 @@ cvDataTest = cvData.transform(message_test)
 
 def model1Accuracy():
     return mnModel.score()
+
+def model2Accuracy():
+    return lrModel.score()
+
+def model3Accuracy():
+    return gnModel.score()
+
+def model4Accuracy():
+    return bnModel.score()
+
+
+
 
 def predict(rt_message):
     atf_message = cvData.transform([rt_message]).toarray()
