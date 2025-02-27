@@ -1,3 +1,4 @@
+
 body {
   background-color: #86adfa;
   font-family: "Inter", sans-serif;
@@ -81,4 +82,16 @@ p {
   border-color: #6a11cb;
   box-shadow: 0 0 8px rgba(106, 17, 203, 0.2);
   outline: none;
+}
+
+.stProgress > div > div > div > div {
+  background-color: #4CAF50;
+  height: 15px;
+  border-radius: 10px;
+} 
+
+/* Progress bar background */
+.stProgress > div > div > div {
+  background-color: #ffb0b0;
+  border-radius: 10px;
 }

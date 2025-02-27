@@ -21,9 +21,6 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import precision_score
 
 
-# for interface
-import streamlit as st
-
 # import data
 data = pd.read_csv("D:\Research\Spam-Detection-ML\sdpmodel2\spam.csv", encoding='latin-1')
 
@@ -78,20 +75,68 @@ def model3Accuracy():
 def model4Accuracy():
     return bnModel.score(cvDataTest, category_test)
 
+
+def newModelAccuracy():
+    # Get predictions from test data
+    pred_mn = mnModel.predict(cvDataTest)
+    pred_lr = lrModel.predict(cvDataTest)
+    # pred_gn = gnModel.predict(cvDataTest.toarray())
+    pred_bn = bnModel.predict(cvDataTest)
+    
+    # Calculate ensemble predictions using majority voting
+    final_predictions = []
+    for i in range(len(pred_mn)):
+        spam_votes = sum([
+            pred[i] == 'Spam' 
+            for pred in [pred_mn, pred_lr, pred_bn]
+        ])
+        final_predictions.append('Spam' if spam_votes >= 2 else 'Not Spam')
+    
+    # Calculate accuracy of ensemble model
+    return accuracy_score(category_test, final_predictions)
+
+
 # data predict
 
 
 def predict(rt_message):
-    atf_message = cvData.transform([rt_message]).toarray()
-    prediction_nb = mnModel.predict(atf_message)
-    prediction_lr = lrModel.predict(atf_message)
+    # Transform input message using CountVectorizer
+    atf_message = cvData.transform([rt_message])
+    atf_message_dense = atf_message.toarray()
     
-    # Return both predictions as a tuple
+    # Get predictions from all models
+    pred_mn = mnModel.predict(atf_message)[0]
+    pred_lr = lrModel.predict(atf_message)[0]
+    pred_gn = gnModel.predict(atf_message_dense)[0]
+    pred_bn = bnModel.predict(atf_message)[0]
+    
+    # Count votes for Spam
+    spam_votes = sum([
+        pred == 'Spam' 
+        for pred in [pred_mn, pred_lr, pred_gn, pred_bn]
+    ])
+    
+    # Return predictions dictionary
     return {
-        'naive_bayes': prediction_nb[0],
-        'logistic_regression': prediction_lr[0],
-        'consensus': 'Spam' if (prediction_nb[0] == 'Spam' and prediction_lr[0] == 'Spam') else 'Not Spam'
+        'multinomial_nb': pred_mn,
+        'logistic_regression': pred_lr,
+        'gaussian_nb': pred_gn,
+        'bernoulli_nb': pred_bn,
+        'consensus': 'Spam' if spam_votes >= 2 else 'Not Spam'
     }
+    
+    
+# def predict(rt_message):
+#     atf_message = cvData.transform([rt_message]).toarray()
+#     prediction_nb = mnModel.predict(atf_message)
+#     prediction_lr = lrModel.predict(atf_message)
+    
+#     # Return both predictions as a tuple
+#     return {
+#         'naive_bayes': prediction_nb[0],
+#         'logistic_regression': prediction_lr[0],
+#         'consensus': 'Spam' if (prediction_nb[0] == 'Spam' and prediction_lr[0] == 'Spam') else 'Not Spam'
+#     }
 
 
 
