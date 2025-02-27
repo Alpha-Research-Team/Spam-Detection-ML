@@ -43,6 +43,7 @@ message_train, message_test, category_train, category_test = train_test_split(me
 
 cvData = CountVectorizer(stop_words='english')
 cvTransform = cvData.fit_transform(message_train)
+cvTransformDense = cvTransform.toarray()
 
 
 # train model
@@ -54,7 +55,7 @@ lrModel = LogisticRegression()
 lrModel.fit(cvTransform, category_train)
 
 gnModel = GaussianNB()
-gnModel.fit(cvTransform, category_train)
+gnModel.fit(cvTransformDense, category_train)
 
 bnModel = BernoulliNB()
 bnModel.fit(cvTransform, category_train)
@@ -62,21 +63,22 @@ bnModel.fit(cvTransform, category_train)
 # test model
 cvDataTest = cvData.transform(message_test)
 
-# data predict
+# test and score model
+
 
 def model1Accuracy():
-    return mnModel.score()
+    return mnModel.score(cvDataTest, category_test)
 
 def model2Accuracy():
-    return lrModel.score()
+    return lrModel.score(cvDataTest, category_test)
 
 def model3Accuracy():
-    return gnModel.score()
+    return gnModel.score(cvDataTest.toarray(), category_test)
 
 def model4Accuracy():
-    return bnModel.score()
+    return bnModel.score(cvDataTest, category_test)
 
-
+# data predict
 
 
 def predict(rt_message):
