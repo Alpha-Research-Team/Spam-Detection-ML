@@ -64,8 +64,8 @@ class SpamDetection:
         self.message = self.dataset['Message']
         self.category = self.dataset['Category']
         
-    def dataset_info(self):
-        return self.dataset.shape
+    # def dataset_info(self):
+    #     return self.dataset.shape
 
     def preprocess_data(self):
         # split data into training and testing sets
