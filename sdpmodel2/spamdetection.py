@@ -9,34 +9,56 @@ from scipy.stats import mode
 import numpy as np
 
 class SpamDetection:
-    def __init__(self, data_path):
-        # Load and preprocess data
-        self.data_path = data_path
+    def __init__(self):
+        # load and preprocess data
+        self.dataset1_path = 'sdpmodel2/spam.csv'
+        self.dataset2_path = 'sdpmodel2/spam3.csv'
         self.load_data()
         self.preprocess_data()
         self.train_models()
 
     def load_data(self):
-        # Load dataset
-        self.dataset = pd.read_csv(self.data_path, encoding='latin-1')
-        self.dataset.drop_duplicates(inplace=True)
-        self.dataset['Category'] = self.dataset['Category'].map({'ham': 'Not Spam', 'spam': 'Spam'})
+        # load dataset
+        dataset1 = pd.read_csv(self.dataset1_path, encoding='latin-1')
+        dataset2 = pd.read_csv(self.dataset2_path, encoding='latin-1')
+        
+         # process dataset1
+        dataset1.dropna(how='any', inplace=True)
+        dataset1.drop_duplicates(inplace=True)
+        dataset1['Category'] = dataset1['Category'].map({'ham': 'Not Spam', 'spam': 'Spam'})
+        
+        # process dataset2
+        categorical_cols = ['Message ID', 'Subject', 'Message', 'Category', 'Date']
+        dataset2[categorical_cols] = dataset2[categorical_cols].fillna('Unknown')
+        dataset2.drop(columns=['Message ID', 'Subject', 'Date'], inplace=True)
+        dataset2.drop_duplicates(inplace=True)
+        dataset2['Category'] = dataset2['Category'].map({'ham': 'Not Spam', 'spam': 'Spam'})
+        
+        # combine datasets
+        self.dataset = pd.concat([dataset1, dataset2], ignore_index=True)
+        
+        #filter job related data
+        
+        self.job_keywords = ['job', 'work', 'career', 'employment', 'position', 'hire', 'recruit', 'opportunity', 'vacancy', 'position']
+        self.dataset = self.dataset[self.dataset['Message'].str.contains('|'.join(self.job_keywords), case=False, na=False)]
+        # final cleanup
+        self.dataset = self.dataset.dropna(subset=['Message', 'Category'])
         self.message = self.dataset['Message']
         self.category = self.dataset['Category']
 
     def preprocess_data(self):
-        # Split data into training and testing sets
+        # split data into training and testing sets
         self.message_train, self.message_test, self.category_train, self.category_test = train_test_split(
             self.message, self.category, test_size=0.2, random_state=42
         )
 
-        # Vectorize text data
+        # vectorize text data
         self.vectorizer = TfidfVectorizer(stop_words='english')
         self.message_train_vec = self.vectorizer.fit_transform(self.message_train)
         self.message_test_vec = self.vectorizer.transform(self.message_test)
 
     def train_models(self):
-        # Train individual models
+        # train individual models
         self.mn_model = MultinomialNB()
         self.lr_model = LogisticRegression(max_iter=500)
         self.bn_model = BernoulliNB()
@@ -55,12 +77,12 @@ class SpamDetection:
         return self.bn_model.score(self.message_test_vec, self.category_test)
 
     def ensemble_accuracy(self):
-    # Get predictions from all models
+    # get predictions from all models
         pred_mn = self.mn_model.predict(self.message_test_vec)
         pred_lr = self.lr_model.predict(self.message_test_vec)
         pred_bn = self.bn_model.predict(self.message_test_vec)
 
-        # Calculate ensemble predictions using majority voting with np.unique
+        # calculate ensemble predictions using majority voting with np.unique
         predictions = np.array([pred_mn, pred_lr, pred_bn])
         ensemble_predictions = np.array([
             np.unique(predictions[:, i], return_counts=True)[0][
@@ -69,7 +91,7 @@ class SpamDetection:
             for i in range(predictions.shape[1])
         ])
 
-        # Calculate accuracy of ensemble model
+        # calculate accuracy of ensemble model
         return accuracy_score(self.category_test, ensemble_predictions)
 
     def predict(self, message):

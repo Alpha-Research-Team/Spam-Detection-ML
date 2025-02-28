@@ -1,7 +1,7 @@
 from sdpmodel2.spamdetection import SpamDetection
 import streamlit as st
 
-spam_detection = SpamDetection("sdpmodel2/spam.csv")
+spam_detection = SpamDetection()
 
 def loadCss(file_name):
     with open(file_name) as f:
@@ -32,17 +32,20 @@ with st.container():
                 st.warning('⚠️ Please enter a valid message.')
             else:
                 result = spam_detection.predict(rt_message)
-                st.write(result);
-                # if result['consensus'] == 'Spam':
-                #     st.markdown(
-                #         f"<div class='result-box spam'>❌ This message is <b>SPAM</b>.</div>",
-                #         unsafe_allow_html=True
-                #     )
-                # else:
-                #     st.markdown(
-                #         f"<div class='result-box not-spam'>✅ This message is <b>NOT SPAM</b>.</div>",
-                #         unsafe_allow_html=True
-                #     )
+                if result['ensemble'] == 'Spam':
+                    st.markdown(
+                        f"<div class='result-box spam'>❌ This message is <b>SPAM</b>.</div>",
+                        unsafe_allow_html=True
+                    )
+                else:
+                    st.markdown(
+                        f"<div class='result-box not-spam'>✅ This message is <b>NOT SPAM</b>.</div>",
+                        unsafe_allow_html=True
+                    )
+                st.write('---')
+                st.write('- Multinomial :', result['multinomial_nb'])
+                st.write('- Logistic Regression :', result['logistic_regression'])
+                st.write('- Bernoulli :', result['bernoulli_nb'])
     with right_column:
         st.subheader("Our Models & Accuracy")
         left_column, right_column = st.columns(2)
