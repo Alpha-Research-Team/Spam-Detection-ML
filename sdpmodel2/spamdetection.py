@@ -7,12 +7,15 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 from scipy.stats import mode
 import numpy as np
+import re
 
 class SpamDetection:
     def __init__(self):
         # load and preprocess data
         self.dataset1_path = 'sdpmodel2/spam.csv'
-        self.dataset2_path = 'sdpmodel2/spam3.csv'
+        self.dataset2_path = 'sdpmodel2/spam2.csv'
+        self.dataset3_path = 'sdpmodel2/spam3.csv'
+        
         self.load_data()
         self.preprocess_data()
         self.train_models()
@@ -20,31 +23,49 @@ class SpamDetection:
     def load_data(self):
         # load dataset
         dataset1 = pd.read_csv(self.dataset1_path, encoding='latin-1')
-        dataset2 = pd.read_csv(self.dataset2_path, encoding='latin-1')
+        dataset2 = pd.read_csv(self.dataset2_path, encoding="utf-8")
+        dataset3 = pd.read_csv(self.dataset3_path, encoding='latin-1')
         
-         # process dataset1
+        # process dataset1
         dataset1.dropna(how='any', inplace=True)
         dataset1.drop_duplicates(inplace=True)
         dataset1['Category'] = dataset1['Category'].map({'ham': 'Not Spam', 'spam': 'Spam'})
         
         # process dataset2
-        categorical_cols = ['Message ID', 'Subject', 'Message', 'Category', 'Date']
-        dataset2[categorical_cols] = dataset2[categorical_cols].fillna('Unknown')
-        dataset2.drop(columns=['Message ID', 'Subject', 'Date'], inplace=True)
+        dataset2.columns = dataset2.columns.str.strip().str.lower()
+        dataset2[['subject', 'message', 'Category']] = dataset2[['subject', 'messages', 'category']].fillna('Unknown')
+        dataset2['Message'] = dataset2['subject'] + " " + dataset2['message']
+        dataset2.drop(columns=['subject', 'message'], inplace=True)
         dataset2.drop_duplicates(inplace=True)
-        dataset2['Category'] = dataset2['Category'].map({'ham': 'Not Spam', 'spam': 'Spam'})
+        dataset2.dropna(subset=['Message', 'Category'], inplace=True)
+        dataset2['Category'] = dataset2['Category'].map({'0': 'Not Spam', '1': 'Spam'})
+        
+        
+        # process dataset3
+        categorical_cols = ['Message ID', 'Subject', 'Message', 'Category', 'Date']
+        dataset3[categorical_cols] = dataset3[categorical_cols].fillna('Unknown')
+        dataset3.drop(columns=['Message ID', 'Subject', 'Date'], inplace=True)
+        dataset3.drop_duplicates(inplace=True)
+        dataset3['Category'] = dataset3['Category'].map({'ham': 'Not Spam', 'spam': 'Spam'})
         
         # combine datasets
-        self.dataset = pd.concat([dataset1, dataset2], ignore_index=True)
+        self.dataset = pd.concat([dataset1, dataset2, dataset3], ignore_index=True)
         
         #filter job related data
         
         self.job_keywords = ['job', 'work', 'career', 'employment', 'position', 'hire', 'recruit', 'opportunity', 'vacancy', 'position']
         self.dataset = self.dataset[self.dataset['Message'].str.contains('|'.join(self.job_keywords), case=False, na=False)]
+        
+        # remove special characters
+        self.dataset['Message'] = self.dataset['Message'].apply(lambda x: re.sub(r'[^\w\s]', '', x))
+        
         # final cleanup
         self.dataset = self.dataset.dropna(subset=['Message', 'Category'])
         self.message = self.dataset['Message']
         self.category = self.dataset['Category']
+        
+    def dataset_info(self):
+        return self.dataset.shape
 
     def preprocess_data(self):
         # split data into training and testing sets
