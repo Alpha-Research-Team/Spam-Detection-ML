@@ -78,7 +78,7 @@ with st.container():
         # dataset_size = spam_detection.dataset_info()
         with st.container():
             st.progress(nmf_accuracy/100)
-            st.write(f"New Model - Accuracy: {nmf_accuracy:.2f}%")
+            st.write(f"Stack Model - Accuracy: {nmf_accuracy:.2f}%")
             # st.write(f"Dataset Size: {dataset_size}")
 
 with st.container():

@@ -3,14 +3,13 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB, BernoulliNB
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, StackingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 from scipy.stats import mode
 import numpy as np
 import re
 
-from sklearn.ensemble import StackingClassifier
 
 
 class SpamDetection:
@@ -93,6 +92,8 @@ class SpamDetection:
         self.lr_model.fit(self.message_train_vec, self.category_train)
         self.bn_model.fit(self.message_train_vec, self.category_train)
         self.rf_model.fit(self.message_train_vec, self.category_train)
+        
+        self.st_model = self.new_stacking_model()
 
     def model1_accuracy(self):
         return self.mn_model.score(self.message_test_vec, self.category_test)
@@ -105,41 +106,33 @@ class SpamDetection:
     
     def model4_accuracy(self):
         return self.rf_model.score(self.message_test_vec, self.category_test)
-
-    estimator = [
-        ('MultinomialNB', MultinomialNB()),
-        ('BernoulliNB', BernoulliNB()),
-        ('RandomForestClassifier', RandomForestClassifier())
-    ]
-    
-    stack_model = StackingClassifier(
-        estimators=estimator, 
-        final_estimator=LogisticRegression()
-    )
     
     
-
+    
+    def new_stacking_model(self):
+        estimator = [
+            ('MultinomialNB', MultinomialNB()),
+            ('BernoulliNB', BernoulliNB()),
+            ('RandomForestClassifier', RandomForestClassifier())
+        ]
+        
+        self.stack_model = StackingClassifier(
+            estimators=estimator, 
+            final_estimator=LogisticRegression()
+        )
+        self.stack_model.fit(self.message_train_vec, self.category_train)
+        # stack_model_score = stack_model.score(self.message_test_vec, self.category_test)
+        return self.stack_model
+    
 
 
 
     def ensemble_accuracy(self):
-    # get predictions from all models
-        pred_mn = self.mn_model.predict(self.message_test_vec)
-        pred_lr = self.lr_model.predict(self.message_test_vec)
-        pred_bn = self.bn_model.predict(self.message_test_vec)
-        pred_rf = self.rf_model.predict(self.message_test_vec)
-
-        # calculate ensemble predictions using majority voting with np.unique
-        predictions = np.array([pred_mn, pred_lr, pred_bn, pred_rf])
-        ensemble_predictions = np.array([
-            np.unique(predictions[:, i], return_counts=True)[0][
-                np.argmax(np.unique(predictions[:, i], return_counts=True)[1])
-            ]
-            for i in range(predictions.shape[1])
-        ])
-
-        # calculate accuracy of ensemble model
-        return accuracy_score(self.category_test, ensemble_predictions)
+    # Get predictions from stacking model
+        pred_sm = self.stack_model.predict(self.message_test_vec)
+    # Calculate accuracy of ensemble model
+        acc = accuracy_score(self.category_test, pred_sm)
+        return acc
 
     def predict(self, message):
         message_vec = self.vectorizer.transform([message])
@@ -152,6 +145,7 @@ class SpamDetection:
         predictions = np.array([pred_mn, pred_lr, pred_bn, pred_rf])
         values, counts = np.unique(predictions, return_counts=True)
         final_prediction = values[np.argmax(counts)]
+        
 
         return {
             'multinomial_nb': pred_mn,
