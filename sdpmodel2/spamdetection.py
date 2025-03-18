@@ -3,11 +3,15 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB, BernoulliNB
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 from scipy.stats import mode
 import numpy as np
 import re
+
+from sklearn.ensemble import StackingClassifier
+
 
 class SpamDetection:
     def __init__(self):
@@ -83,10 +87,12 @@ class SpamDetection:
         self.mn_model = MultinomialNB()
         self.lr_model = LogisticRegression(max_iter=500)
         self.bn_model = BernoulliNB()
+        self.rf_model = RandomForestClassifier(n_estimators=10)
 
         self.mn_model.fit(self.message_train_vec, self.category_train)
         self.lr_model.fit(self.message_train_vec, self.category_train)
         self.bn_model.fit(self.message_train_vec, self.category_train)
+        self.rf_model.fit(self.message_train_vec, self.category_train)
 
     def model1_accuracy(self):
         return self.mn_model.score(self.message_test_vec, self.category_test)
@@ -96,15 +102,35 @@ class SpamDetection:
 
     def model3_accuracy(self):
         return self.bn_model.score(self.message_test_vec, self.category_test)
+    
+    def model4_accuracy(self):
+        return self.rf_model.score(self.message_test_vec, self.category_test)
+
+    estimator = [
+        ('MultinomialNB', MultinomialNB()),
+        ('BernoulliNB', BernoulliNB()),
+        ('RandomForestClassifier', RandomForestClassifier())
+    ]
+    
+    stack_model = StackingClassifier(
+        estimators=estimator, 
+        final_estimator=LogisticRegression()
+    )
+    
+    
+
+
+
 
     def ensemble_accuracy(self):
     # get predictions from all models
         pred_mn = self.mn_model.predict(self.message_test_vec)
         pred_lr = self.lr_model.predict(self.message_test_vec)
         pred_bn = self.bn_model.predict(self.message_test_vec)
+        pred_rf = self.rf_model.predict(self.message_test_vec)
 
         # calculate ensemble predictions using majority voting with np.unique
-        predictions = np.array([pred_mn, pred_lr, pred_bn])
+        predictions = np.array([pred_mn, pred_lr, pred_bn, pred_rf])
         ensemble_predictions = np.array([
             np.unique(predictions[:, i], return_counts=True)[0][
                 np.argmax(np.unique(predictions[:, i], return_counts=True)[1])
@@ -121,8 +147,9 @@ class SpamDetection:
         pred_mn = self.mn_model.predict(message_vec)[0]
         pred_lr = self.lr_model.predict(message_vec)[0]
         pred_bn = self.bn_model.predict(message_vec)[0]
+        pred_rf = self.rf_model.predict(message_vec)[0]
 
-        predictions = np.array([pred_mn, pred_lr, pred_bn])
+        predictions = np.array([pred_mn, pred_lr, pred_bn, pred_rf])
         values, counts = np.unique(predictions, return_counts=True)
         final_prediction = values[np.argmax(counts)]
 
@@ -130,5 +157,6 @@ class SpamDetection:
             'multinomial_nb': pred_mn,
             'logistic_regression': pred_lr,
             'bernoulli_nb': pred_bn,
+            'random_forest': pred_rf,
             'ensemble': final_prediction
         }

@@ -46,6 +46,7 @@ with st.container():
                 st.write('- Multinomial :', result['multinomial_nb'])
                 st.write('- Logistic Regression :', result['logistic_regression'])
                 st.write('- Bernoulli :', result['bernoulli_nb'])
+                st.write('- Random Forest :', result['random_forest'])
     with right_column:
         st.subheader("Our Models & Accuracy")
         left_column, right_column = st.columns(2)
@@ -64,6 +65,10 @@ with st.container():
             bn_accuracy = (spam_detection.model3_accuracy() * 100)
             st.progress(bn_accuracy/100)
             st.write(f"Naive Bayes (Bernoulli) : {bn_accuracy:.2f}%")
+            
+            rf_accuracy = (spam_detection.model4_accuracy() * 100)
+            st.progress(rf_accuracy/100)
+            st.write(f"Random Forest : {rf_accuracy:.2f}%")
             
             # bn_accuracy = (sd.model4Accuracy() * 100)
             # st.progress(bn_accuracy/100)
