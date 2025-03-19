@@ -74,20 +74,20 @@ with st.container():
             # st.progress(bn_accuracy/100)
             # st.write(f"Naive Bayes (Bernoulli) - Accuracy: {bn_accuracy:.2f}%")
             
-        nmf_accuracy = (spam_detection.ensemble_accuracy() * 100)
+        nmf_accuracy = (spam_detection.stack_model_accuracy() * 100)
         # dataset_size = spam_detection.dataset_info()
         with st.container():
             st.progress(nmf_accuracy/100)
             st.write(f"Stack Model - Accuracy: {nmf_accuracy:.2f}%")
             # st.write(f"Dataset Size: {dataset_size}")
 
-with st.container():
-    st.write("---")
-    left_column, middle_column, right_column = st.columns((3,1,2))
-    with left_column:
-        st.write("Re Train New Model")
-        if st.button("Re Train New Model"):
-            spam_detection.train_models()
+# with st.container():
+#     st.write("---")
+#     left_column, middle_column, right_column = st.columns((3,1,2))
+#     with left_column:
+#         st.write("Re Train New Model")
+#         if st.button("Re Train New Model"):
+#             spam_detection.train_models()
 
 with st.container():
     st.write("---")

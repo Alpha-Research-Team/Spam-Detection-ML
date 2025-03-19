@@ -93,7 +93,7 @@ class SpamDetection:
         self.bn_model.fit(self.message_train_vec, self.category_train)
         self.rf_model.fit(self.message_train_vec, self.category_train)
         
-        self.st_model = self.new_stacking_model()
+        # self.st_model = self.new_stacking_model()
 
     def model1_accuracy(self):
         return self.mn_model.score(self.message_test_vec, self.category_test)
@@ -127,12 +127,12 @@ class SpamDetection:
 
 
 
-    def ensemble_accuracy(self):
+    def stack_model_accuracy(self):
     # Get predictions from stacking model
         pred_sm = self.stack_model.predict(self.message_test_vec)
     # Calculate accuracy of ensemble model
-        acc = accuracy_score(self.category_test, pred_sm)
-        return acc
+        stack_accuracy_score = accuracy_score(self.category_test, pred_sm)
+        return stack_accuracy_score
 
     def predict(self, message):
         message_vec = self.vectorizer.transform([message])
