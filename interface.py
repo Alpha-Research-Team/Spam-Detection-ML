@@ -31,7 +31,7 @@ with st.container():
             if rt_message.strip() == '':
                 st.warning('⚠️ Please enter a valid message.')
             else:
-                result = spam_detection.predict(rt_message)
+                result = spam_detection.stack_predict(rt_message)
                 if result['ensemble'] == 'Spam':
                     st.markdown(
                         f"<div class='result-box spam'>❌ This message is <b>SPAM</b>.</div>",
@@ -43,10 +43,20 @@ with st.container():
                         unsafe_allow_html=True
                     )
                 st.write('---')
-                st.write('- Multinomial :', result['multinomial_nb'])
-                st.write('- Logistic Regression :', result['logistic_regression'])
-                st.write('- Bernoulli :', result['bernoulli_nb'])
-                st.write('- Random Forest :', result['random_forest'])
+                # if result['multinomial_nb']:
+                #     st.write('- Multinomial :', result['multinomial_nb'])
+                # if result['logistic_regression']:
+                #     st.write('- Logistic Regression :', result['logistic_regression'])
+                # if result['bernoulli_nb']:
+                #     st.write('- Bernoulli :', result['bernoulli_nb'])
+                # if result['random_forest']:
+                #     st.write('- Random Forest :', result['random_forest'])
+                    
+                    
+                # st.write('- Multinomial :', result['multinomial_nb'])
+                # st.write('- Logistic Regression :', result['logistic_regression'])
+                # st.write('- Bernoulli :', result['bernoulli_nb'])
+                # st.write('- Random Forest :', result['random_forest'])
     with right_column:
         st.subheader("Our Models & Accuracy")
         left_column, right_column = st.columns(2)
@@ -93,4 +103,3 @@ with st.container():
     st.write("---")
     st.write("Alpha Research Team RUSL (2024 - 2025)")
     st.write("Team : Kavishan - Rashmika - Tharushi - Suneth")
-    
