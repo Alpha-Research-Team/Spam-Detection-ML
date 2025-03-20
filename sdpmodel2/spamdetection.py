@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB, BernoulliNB
-from sklearn.ensemble import RandomForestClassifier, StackingClassifier
+from sklearn.ensemble import RandomForestClassifier, StackingClassifier, BaggingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 from scipy.stats import mode
@@ -11,6 +11,7 @@ import numpy as np
 import re
 import os
 import pickle
+
 
 class SpamDetection:
     def __init__(self, use_cache=False):  # Set default to False to force retraining
@@ -44,6 +45,7 @@ class SpamDetection:
                 self.bn_model = cache_data['bn_model']
                 self.rf_model = cache_data['rf_model']
                 self.stack_model = cache_data['stack_model']
+                self.bagging_model = cache_data['bagging_model']  # Load the bagging model
                 self.message_test_vec = cache_data['message_test_vec']
                 self.category_test = cache_data['category_test']
         except (FileNotFoundError, KeyError, pickle.UnpicklingError):
@@ -61,6 +63,7 @@ class SpamDetection:
             'bn_model': self.bn_model,
             'rf_model': self.rf_model,
             'stack_model': self.stack_model,
+            'bagging_model': self.bagging_model,  # Add the bagging model
             'message_test_vec': self.message_test_vec,
             'category_test': self.category_test
         }
@@ -140,6 +143,9 @@ class SpamDetection:
         
         # Create stacking model
         self.stack_model = self.new_stacking_model()
+        
+        # Create bagging model - NEW CODE
+        self.bagging_model = self.new_bagging_model()
 
     def model1_accuracy(self):
         return self.mn_model.score(self.message_test_vec, self.category_test)
@@ -174,6 +180,32 @@ class SpamDetection:
         # Calculate accuracy of ensemble model
         stack_accuracy_score = accuracy_score(self.category_test, pred_sm)
         return stack_accuracy_score
+    
+    def new_bagging_model(self):
+        """Create and train a bagging ensemble model"""
+        # Create base estimators for bagging
+        base_nb = LogisticRegression(max_iter=500, C=1.0)
+        
+        # Create bagging classifier with the base estimator
+        bagging_model = BaggingClassifier(
+            estimator=base_nb,
+            n_estimators=10,
+            max_samples=0.8,
+            max_features=0.8,
+            bootstrap=True,
+            bootstrap_features=False,
+            random_state=42
+        )
+        
+        # Train the bagging model
+        bagging_model.fit(self.message_train_vec, self.category_train)
+        return bagging_model
+    
+    def bagging_model_accuracy(self):
+        """Calculate accuracy of the bagging model"""
+        pred_bg = self.bagging_model.predict(self.message_test_vec)
+        bagging_accuracy_score = accuracy_score(self.category_test, pred_bg)
+        return bagging_accuracy_score
 
     def predict(self, message):
         message_vec = self.vectorizer.transform([message])
@@ -201,4 +233,42 @@ class SpamDetection:
         return {
             'stack model': pred_sm,
             'ensemble': pred_sm
+        }
+        
+    def bagging_predict(self, message):
+        """Make predictions using the bagging model"""
+        message_vec = self.vectorizer.transform([message])
+        pred_bg = self.bagging_model.predict(message_vec)[0]
+        return {
+            'bagging model': pred_bg,
+            'ensemble': pred_bg
+        }
+        
+    def predict_all(self, message):
+        """Make predictions using all models including both ensemble methods"""
+        message_vec = self.vectorizer.transform([message])
+        
+        # Individual model predictions
+        pred_mn = self.mn_model.predict(message_vec)[0]
+        pred_lr = self.lr_model.predict(message_vec)[0]
+        pred_bn = self.bn_model.predict(message_vec)[0]
+        pred_rf = self.rf_model.predict(message_vec)[0]
+        
+        # Ensemble model predictions
+        pred_stack = self.stack_model.predict(message_vec)[0]
+        pred_bagging = self.bagging_model.predict(message_vec)[0]
+        
+        # Combine all predictions for a final ensemble
+        predictions = np.array([pred_mn, pred_lr, pred_bn, pred_rf, pred_stack, pred_bagging])
+        values, counts = np.unique(predictions, return_counts=True)
+        final_prediction = values[np.argmax(counts)]
+        
+        return {
+            'multinomial_nb': pred_mn,
+            'logistic_regression': pred_lr,
+            'bernoulli_nb': pred_bn,
+            'random_forest': pred_rf,
+            'stack_model': pred_stack,
+            'bagging_model': pred_bagging,
+            'ensemble': final_prediction
         }

@@ -95,3 +95,44 @@ p {
   background-color: #ffb0b0;
   border-radius: 10px;
 }
+
+/* Add these styles to your existing CSS file */
+
+.model-result {
+  padding: 8px 12px;
+  margin: 5px 0;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.model-result.spam {
+  background-color: rgba(255, 99, 71, 0.2);
+  border-left: 4px solid tomato;
+}
+
+.model-result.not-spam {
+  background-color: rgba(46, 204, 113, 0.2);
+  border-left: 4px solid #2ecc71;
+}
+
+/* Enhance the existing result-box styles */
+.result-box {
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 8px;
+  font-size: 18px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.result-box.spam {
+  background-color: rgba(255, 99, 71, 0.3);
+  border: 2px solid tomato;
+}
+
+.result-box.not-spam {
+  background-color: rgba(46, 204, 113, 0.3);
+  border: 2px solid #2ecc71;
+}
+
