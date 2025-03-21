@@ -181,6 +181,6 @@ with left_column:
 
 with st.container():
     st.write("---")
-    st.write("Alpha Research Team RUSL (2024 - 2025)")
+    st.write("Alpha Research Team - Faculty of Technology, Rajarata University of Sri Lanka (2024 - 2025)")
     st.write("Team Members : Mr. Ushmika Kavishan - Miss. Rashmika Malshani - Miss.Tharushi Vinodya - Mr. Suneth Udayanga")
     st.write("Team Supervisor : Mr. Husni Mohamed ")
