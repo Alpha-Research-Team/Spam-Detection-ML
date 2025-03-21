@@ -181,7 +181,7 @@ with left_column:
 
 with st.container():
     st.write("---")
-    st.write("Team Members : Mr. Ushmika Kavishan - Miss. Rashmika Malshani - Miss.Tharushi Vinodya - Mr. Suneth Udayanga")
+    st.write("Team Members : Mr. Ushmika Kavishan - Miss. Rashmika Malshani - Miss. Tharushi Vinodya - Mr. Suneth Udayanga")
     st.write("Team Supervisor : Mr. Husni Mohamed ")
     
 with st.container():
