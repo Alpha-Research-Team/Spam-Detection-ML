@@ -181,6 +181,9 @@ with left_column:
 
 with st.container():
     st.write("---")
-    st.write("Alpha Research Team - Faculty of Technology, Rajarata University of Sri Lanka (2024 - 2025)")
     st.write("Team Members : Mr. Ushmika Kavishan - Miss. Rashmika Malshani - Miss.Tharushi Vinodya - Mr. Suneth Udayanga")
     st.write("Team Supervisor : Mr. Husni Mohamed ")
+    
+with st.container():
+    write("---")
+    st.markdown("<h4 style='text-align: center;'>Alpha Research Team - Faculty of Technology, Rajarata University of Sri Lanka (2024 - 2025)</h4>", unsafe_allow_html=True)
