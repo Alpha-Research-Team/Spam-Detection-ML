@@ -185,5 +185,5 @@ with st.container():
     st.write("Team Supervisor : Mr. Husni Mohamed ")
     
 with st.container():
-    write("---")
+    st.write("---")
     st.markdown("<h4 style='text-align: center;'>Alpha Research Team - Faculty of Technology, Rajarata University of Sri Lanka (2024 - 2025)</h4>", unsafe_allow_html=True)
