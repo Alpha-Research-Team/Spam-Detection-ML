@@ -186,4 +186,4 @@ with st.container():
     
 with st.container():
     st.write("---")
-    st.markdown("<h5 style='text-align: center;'>Alpha Research Team - Faculty of Technology, Rajarata University of Sri Lanka (2024 - 2025)</h5>", unsafe_allow_html=True)
+    st.markdown("<h6 style='text-align: center;'>Alpha Research Team - Faculty of Technology, Rajarata University of Sri Lanka (2024 - 2025)</h6>", unsafe_allow_html=True)
